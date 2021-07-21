@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Sep  1 16:26:57 2020
+@author: trovao
+ERA5
+figura de PNMM em contorno, intensidade do vento a 10 m
+em colorido e direção do vento em vetor
+a cada 6 horas
+"""
+from netCDF4 import Dataset,num2date
+import numpy as np
+#import matplotlib.pyplot as plt
+#import cartopy.crs as ccrs
+#import cartopy.feature as ft
+#from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+#import xarray as xr
+def plota_mapa(LATS, LONS, WS, U, V,data1,data2,u_norm,v_norm,pnmm,i):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import cartopy.crs as ccrs
+    from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+    from cartopy.io.shapereader import Reader
+    import matplotlib.ticker as mticker
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    plt.rcParams["figure.figsize"]=[30,20]    
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+
+    LATi, LONi=0, -60
+    LATf, LONf=-45, -20
+    bounds = [(LONi, LONf, LATi, LATf)]
+    ax.set_extent(*bounds, crs=ccrs.PlateCarree())
+    
+    SHP_AS=Reader("SHAPES/AS - Brasil/america_do_sul.shp").geometries()
+    SHP_BRASIL=Reader("SHAPES/Brasil/estados_2010.shp").geometries()
+    SHP_BS=Reader("SHAPES/BS/Bacia_Santos.shp").geometries()
+    SHP_blue=Reader("SHAPES/BS/shape_azul.shp").geometries()
+    SHP_red=Reader("SHAPES/BS/shape_vermelho.shp").geometries()
+#    ax.add_geometries(SHP_BRASIL, ccrs.PlateCarree(), linewidth=1, facecolor="w", edgecolor="gray", zorder=5)
+    ax.add_geometries(SHP_AS, ccrs.PlateCarree(), linewidth=1.7, facecolor="none", edgecolor="gray")
+    ax.add_geometries(SHP_BRASIL, ccrs.PlateCarree(), linewidth=1.7, facecolor="none", edgecolor="gray")
+    ax.add_geometries(SHP_BS, ccrs.PlateCarree(), linewidth=1.8, facecolor="none", edgecolor="red")
+    ax.add_geometries(SHP_blue, ccrs.PlateCarree(), linewidth=1.8, facecolor="none", edgecolor="red")
+    ax.add_geometries(SHP_red, ccrs.PlateCarree(), linewidth=1.8, facecolor="none", edgecolor="red")
+
+    cf = ax.contourf(x, y, WS, levels=np.arange(0,29,2), cmap="viridis", transform=ccrs.PlateCarree())
+    cp=ax.contour(x, y, pnmm, transform=ccrs.PlateCarree(), linewidths=2,colors='black',levels=np.arange(992,1040,4))
+    cl=ax.clabel(cp, cp.levels, inline=True, fontsize=15,fmt='%d')
+#    [txt.set_backgroundcolor('white') for txt in cl]
+    [txt.set_bbox(dict(facecolor='white', edgecolor='none', pad=0,alpha=0.7)) for txt in cl]
+    ax.set_title('PNMM (hPa) e vento a 10 m (m/s) \n '+data2,fontdict={'fontsize':30},loc='center') 
+    axins = inset_axes(ax, width="100%", height="100%", loc='lower left', borderpad=0,
+                       bbox_to_anchor=(1.03, 0.35, 0.06, 0.5), bbox_transform=ax.transAxes)
+    cb=fig.colorbar(cf, cax=axins)
+    cb.ax.tick_params(labelsize=25)
+#    ax.text(-18,-14.5,'m/s',fontsize=25)
+    skip=8
+    ax.quiver(x[::skip,::skip], y[::skip,::skip], u_norm[::skip,::skip], v_norm[::skip,::skip],
+              scale=30,headwidth=8, headlength=8)
+
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, linewidth=1, color='gray', alpha=0.5, linestyle='--')
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.xlocator = mticker.FixedLocator(np.arange(LONf, LONi, -5))
+    gl.xlabels_top = False
+    gl.xlines = False
+    gl.xlabel_style = {'fontsize':25}
+
+    gl.yformatter = LATITUDE_FORMATTER
+    gl.ylocator = mticker.FixedLocator(np.arange(LATi, LATf, -5))
+    gl.ylabels_right = False
+    gl.ylines = False
+    gl.ylabel_style = {'rotation':'vertical','fontsize':25}
+
+    plt.tight_layout()
+ #   plt.savefig("teste.png", dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.savefig("CS"+i+"/pnmmvento_"+data1+".png", dpi=300, bbox_inches='tight', pad_inches=0.2)
+    plt.show()
+
+for i in range(1,2):
+    i=str(i)
+    path='/home/trovao/Área de Trabalho/CS/ERA5/dados/'
+    dado1=Dataset(path+'cs'+i+'_1.nc',mode='r')
+    #dado2=Dataset(path+'cs1_2.nc',mode='r')
+    
+    lat=dado1.variables["latitude"][:]
+    lon=dado1.variables["longitude"][:]
+    
+    x,y = np.meshgrid(lon,lat)
+    
+    time=dado1.variables['time']
+    t_unit = "hours since 1900-01-01 00:00:00.0"
+    t_cal = "gregorian"
+    dates = num2date(dado1.variables["time"][:].data, units = t_unit, calendar = t_cal)
+    
+    
+    u10= np.array(dado1.variables['u10'][:, :, :])
+    v10= np.array(dado1.variables['v10'][:, :, :])
+    pnmm=np.array(dado1.variables['msl'][:, :, :])*0.01
+    #intensidade
+    ws = np.sqrt(u10**2+v10**2)
+    
+    u_norm = u10/ws
+    v_norm = v10/ws    
+    for t in range(0,u10.shape[0],6):
+    #    data=str(dates[t])
+        ano=str(dates[t].year)
+        mes=str(dates[t].month)
+        dia=str(dates[t].day)  
+        hora=str(dates[t].hour)
+        if int(mes)<10:
+            mes='0'+mes
+        if int(dia)<10:
+            dia='0'+dia
+        if int(hora)<10:
+            hora='0'+hora
+        data1=ano+mes+dia+hora
+        data2=dia+"/"+mes+"/"+ano+" "+hora+" h"
+        plota_mapa(lat, lon, ws[t], u10[t], v10[t],data1,data2,u_norm[t],v_norm[t],pnmm[t],i)
+
+        
