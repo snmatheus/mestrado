@@ -81,8 +81,7 @@ else:
 
             tnh = len(time)
 
-            print(time[0].strftime('%Y-%m-%dT%H:00'),
-                  time[-1].strftime('%Y-%m-%dT%H:00'))
+            print('{:%Y-%m-%dT%Hhr} {:%Y-%m-%dT%Hhr}'.format(time[0], time[-1]))
 
             spd_data = r_data/3600
             wnd10_data = (u_data**2 + v_data**2)**0.5

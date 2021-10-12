@@ -11,6 +11,11 @@ path_pos = "../dados/pos/"
 
 path_output = "../saidas/"
 
+path_shp = '../../SHAPES/'
+
+path_points = './ZEE_pontos/'
+
+
 wpdmin = 210
 spdmin = 113
 

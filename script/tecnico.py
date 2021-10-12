@@ -14,10 +14,9 @@ from scipy.special import gamma
 import matplotlib.pyplot as plt
 import SAIDA as OUT
 from datetime import datetime
+from constants import path_dados
 
 start = datetime.now()
-
-PATH_DADOS = "/home/administrador/Documentos/DISSERTACAO/DADOS/"
 
 lats = OUT.lats
 lons = OUT.lons
@@ -47,7 +46,7 @@ for latlon in fll.readlines()[1:]:
     j = np.where(lats == lts)
     ijs.append((j[0][0], i[0][0]))
     latlons.append((lts, lns))
-    
+    # 
 arq = "../DADOS/NPY/30ANOS/ROCI_medio_geral.npy"
 tmeans_r = np.load(arq)
 means_r = []
@@ -55,30 +54,6 @@ for ii, jj in ijs:
     means_r.append(tmeans_r[ii, jj])
 medias_rad = pd.DataFrame({"latlons": latlons, "dp": means_r})
 
-# arquivos = ["../DADOS/VENTO/ERA_UV_"+str(ano)+".nc" for ano in range(1990, 1991)]
-# ano = "1990"
-# for arq in arquivos:
-#     means, stds = [], []
-#     # arq = "../DADOS/VENTO/ERA_UV_"+ano+".nc"
-#     print(arq.split("/")[-1])
-
-#     netcdf_v = xr.open_dataset(arq)
-#     for jj, ii in ijs:
-#         u = np.array(netcdf_v.variables['u10'][:,jj, ii])
-#         v = np.array(netcdf_v.variables['v10'][:,jj, ii])
-#         ws = np.sqrt(u**2+v**2)
-#         ws100 = ws * (ln(100/0.0002)/ln(10/0.0002))
-
-#         means.append(np.mean(ws100, axis=0))
-#         stds.append(np.std(ws100, axis=0))
-#     netcdf_v.close()
-
-#     medias_ws100 = pd.DataFrame({"latlons": latlons, "dp": means})
-#     devpads_ws100 = pd.DataFrame({"latlons": latlons, "dp": stds})
-
-#     medias_ws100.to_csv(PATH_DADOS+"MD_DPS/2medias_ws100_"+ano)
-#     devpads_ws100.to_csv(PATH_DADOS+"MD_DPS/2devpads_ws100_"+ano)
-#     ano = str(int(ano)+1)
 
 mlatlon, medias = [], {}
 devpads = {}

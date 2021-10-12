@@ -35,10 +35,9 @@ def extrapolate(ws):
 
 
 def climatology(datas):
-    sum_ = np.zeros(datas['1990'].shape)
-    for data in datas.values():
+    sum_ = np.zeros(datas[0].shape)
+    for data in datas:
         sum_ += data
-
     return sum_/len(datas)
 
 

@@ -28,7 +28,7 @@ wcss = {}
 scws = {}
 sinergys = {}
 
-if os.path.isfile(path_pos + 'save.lats'):
+if os.path.isfile(path_pos + 'save.u_means'):
     lats = load_variable('save.lats')
     lons = load_variable('save.lons')
     u_means = load_variable('save.u_means')
