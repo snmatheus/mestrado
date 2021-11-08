@@ -14,7 +14,7 @@ def load_variable(file_name):
 
 def save_variable(data, file_name):
     with open(path_pos + file_name, 'wb') as file:
-      pickle.dump(data, file)
+      pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def ln(x):

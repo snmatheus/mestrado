@@ -11,7 +11,7 @@ path_pos = "../dados/pos/"
 
 path_output = "../saidas/"
 
-path_shp = '../../SHAPES/'
+path_shp = '../../shapes/'
 
 path_points = './ZEE_pontos/'
 

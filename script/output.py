@@ -71,21 +71,31 @@ def legenda(ax, lat, lon):
 
 
 def siglas(ax, r):
-    if r == 'NNE' or r == 'BR':
-        for k, v in pos_siglas.items():
-            ax.text(v[1], v[0], k, color='#4F4F4F', zorder=14)
+    SIGLAS = { 
+            "CE": (-5.3067450, -39.843010), "AP": (1.258245, -51.609507),
+            "MA": (-4.498199, -45.338160),
+            "PA": (-2.679555, -47.934728),
+            "PB": (-7.2663620, -36.642835), "PE": (-7.755057, -35.272919),
+            "PI": (-7.5557450, -42.802614), "RN": (-5.7803050, -36.786438),
+            "TO": (-6.466770, -48.178640), }
 
-    if r == 'SSE' or r == 'BR':
-        for k, v in pos_siglas2.items():
-            ax.text(v[1], v[0], k, color='#4F4F4F', zorder=14)
+    SIGLAS2 = {  
+                "ES": (-19.615438, -40.765840), "GO": (-17.138677, -50.355021),
+                "MS": (-19.792475, -52.458537), "BA": (-16.992282, -39.690487),
+                "MG": (-19.587865, -44.699646), "PR": (-25.108172, -49.621746),
+                "RJ": (-22.170342, -42.644215), "RS": (-29.354136, -53.336608),
+                "SC": (-27.207366, -50.449029), "SP": (-22.117968, -48.911867),
+                "MT": (-16.599580, -53.698997),}
 
-    if r == 'NNE':
-        ax.text(-36.2, 5, 'Atlantic Ocean', color='#4F4F4F',
-                fontstyle='italic', fontsize=20, zorder=14)
 
-    elif r == 'SSE' or r == 'BR':
-        ax.text(-37.2, -36.5, 'Atlantic Ocean', color='#4F4F4F',
-                fontstyle='italic', fontsize=20, zorder=14)
+    if r=="NNE":
+        for k, v in SIGLAS.items():
+            ax.text(v[1], v[0], k, zorder=14)
+            ax.text(-40.2, 5,"Atlantic Ocean", color='#000000', fontstyle='italic', fontsize=20, zorder=14)
+    if r=="SSE":
+        for k, v in SIGLAS2.items():
+            ax.text(v[1], v[0], k, zorder=14)
+            ax.text(-43, -34.5, "Atlantic Ocean", color='#000000', fontstyle='italic', fontsize=20, zorder=14)
 
 
 def continente(ax, batimetria=False, zee_color='grey'):
@@ -192,7 +202,7 @@ def plota_area(lats, lons, fname, dir_):
     moldura(ax)
 
     plt.savefig(path_output + dir_ + fname + '.png', bbox_inches='tight')
-    plt.show()
+    # plt.show()
 
 
 def plota_ts(lats, lons, times, wpd, spd, format, xlabel, fname, dir_):    
@@ -245,7 +255,7 @@ def plota_ts(lats, lons, times, wpd, spd, format, xlabel, fname, dir_):
 
         plt.savefig('{}{}{}_p{}.png'.format(path_output, dir_, fname, pt),
                     bbox_inches='tight', dpi=300)
-        plt.show()
+        # plt.show()
 
         pt += 1
 
@@ -304,7 +314,7 @@ def plota_ts2(lats, lons, times, wpd, spd, format, xlabel, fname, dir_):
         plt.title('Ponto # {:02d}'.format(pt), fontsize=16)
         plt.savefig('{}{}{}_p{}.png'.format(path_output, dir_, fname, pt),
                     bbox_inches='tight', dpi=300)
-        plt.show()
+        # plt.show()
 
         pt += 1
 
@@ -366,7 +376,7 @@ def plota_mapa(lats, lons, data, fname, dir_, zee_color='red', u=[], v=[]):
     fig.colorbar(cf, cax=axins)
 
     plt.savefig(path_output + dir_ + fname + '.png', bbox_inches='tight', dpi=300)
-    plt.show()
+    # plt.show()
 
 
 def plota_mapa_anual(lats, lons, data, fname, dir_, zee_color, u=[], v=[]):
@@ -557,7 +567,7 @@ def plota_mapa_monthly(lats, lons, data, fname, dir_, zee_color='red',
     fig.colorbar(cf, cax=axins, orientation='horizontal')
 
     plt.savefig(path_output + dir_ + fname + '.png', bbox_inches='tight')
-    plt.show()
+    # plt.show()
 
 
 def plota_mapa_hourly(lats, lons, data, fname, dir_, zee_color, u=[], v=[]):
@@ -708,7 +718,7 @@ def plota_power_curve(dados, f, k, c):
              label='k = '+str(round(k, 1))+', c = '+str(round(c, 1)))
     plt.legend(fontsize=16)
     plt.savefig('../SAIDAS/WEIBULL.png', bbox_inches='tight')
-    plt.show()
+    # plt.show()
 
     plt.rcParams['figure.figsize'] = [8, 4]
     plt.title('Power Curve', size=18)
@@ -724,7 +734,7 @@ def plota_power_curve(dados, f, k, c):
              label='IEC Class IB', color='blue')
     plt.legend(loc='best')
     plt.savefig('../SAIDAS/POWER_CURVE.png', bbox_inches='tight')
-    plt.show()
+    # plt.show()
 
 
 def plota_grid():
@@ -804,7 +814,7 @@ def plota_gridzoom():
     plt.savefig('../SAIDAS/grade_zoom.png', bbox_inches='tight')
 
 
-def plota_bat(lats, lons, data, fname, dir_, zee_color='red'):
+def plota_bat(lats, lons, data, fname, dir_, zee_color='red', area=''):
 
     plt.rcParams['figure.figsize'] = [10, 10]
 
@@ -818,50 +828,69 @@ def plota_bat(lats, lons, data, fname, dir_, zee_color='red'):
     cf = ax.contourf(lons, lats, -999*(1**data), levels=levels2, cmap=cmap,
                      norm=norm, transform=proj, zorder=13)
 
-    bounds = [(lons.min(), lons.max(), lats.min(), lats.max())]
-    ax.set_extent(*bounds, crs=proj)
+    if area == 'NNE':
+        siglas(ax, "NNE")
+        LATi, LONi=6, -52
+        LATf, LONf=-8, -34
+    elif area == 'SSE':
+        siglas(ax, "SSE")
+        LATi, LONi=-16, -54
+        LATf, LONf=-35, -35.5
+    else:
+        siglas(ax, 'BR')
+        LATi, LONi=lats.max(), lons.min()
+        LATf, LONf=lats.min(), lons.max()
+        
+    bounds = [LONi, LONf, LATi, LATf]
+    ax.set_extent(bounds, crs=proj)
 
     continente(ax, True, 'black')
-    siglas(ax, 'BR')
     moldura(ax)
     ax.set(facecolor = "orange")
 
     if 'Wind_Speed' in fname:
         vmin, vmax = 0, 12.1
+        nbins = 12
         cmap, label = 'afmhot_r', 'm/s'
 
     elif 'Availability' in fname or 'Complements' in fname \
          or 'Synergy' in fname or 'CF' in fname:
-        vmin, vmax = 0, 100
+        vmin, vmax = 0, 80
+        nbins = 8
         cmap, label = 'inferno', '%'
 
     elif 'WPD' in fname:
-        vmin, vmax = 0, 1101
+        vmin, vmax = 0, 200
+        nbins = 2
         cmap, label = 'afmhot_r', 'W/m²'
 
     elif 'SPD' in fname:
-        vmin, vmax = 0, 351
+        vmin, vmax = 0, 350
+        nbins = 7
         cmap, label = 'afmhot_r', 'W/m²'
 
     elif 'AEP' in fname:
-        vmin, vmax = 0, 1101
+        vmin, vmax = 0, 800
+        vmin, vmax = data[data>0].min(), data[data>0].max()
+        nbins = 10
         cmap, label = 'hot_r', 'MWh'
 
-    vmin, vmax = data[data>0].min(), data[data>0].max()
-    levels = MaxNLocator(nbins=10).tick_values(vmin, vmax)
+    levels = MaxNLocator(nbins=nbins).tick_values(vmin, vmax)
     cmap = plt.get_cmap(cmap)
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
     data[data<=0] = np.nan
-    cf = ax.pcolormesh(lons, lats, data, cmap=cmap, norm=norm, transform=proj,
-                       zorder=13)
+    cf = ax.pcolormesh(lons, lats, data, cmap=cmap, norm=norm, transform=proj, zorder=13)
 
-    axins = inset_axes(ax, width='100%', height='100%', loc='lower left',
+    if area == 'NNE':
+        axins = inset_axes(ax, width="100%", height="100%", loc='lower left',
+                       borderpad=0, bbox_to_anchor=(0.03, 0.05, 0.06, 0.4),
+                       bbox_transform=ax.transAxes, axes_kwargs= {'title': label})
+    if area == 'SSE':
+        axins = inset_axes(ax, width="100%", height="100%", loc='lower left',
                        borderpad=0, bbox_to_anchor=(0.03, 0.35, 0.06, 0.4),
-                       bbox_transform=ax.transAxes,
-                       axes_kwargs={'title': label})
-
+                       bbox_transform=ax.transAxes, axes_kwargs= {'title': label})
     fig.colorbar(cf, cax=axins)
 
-    plt.savefig(path_output + dir_ + fname + '.png', bbox_inches='tight', dpi=300)
+    plt.savefig(path_output + dir_ + fname + '_' + area + '.png', bbox_inches='tight', dpi=300)
     plt.show()
