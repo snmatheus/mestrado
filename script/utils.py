@@ -36,9 +36,25 @@ def extrapolate(ws):
 
 def climatology(datas):
     sum_ = np.zeros(datas[0].shape)
+
     for data in datas:
         sum_ += data
+
     return sum_/len(datas)
+
+
+def climatology_m(list):
+    output = []
+
+    for datas in list:
+        sum = np.zeros(datas[0].shape)
+
+        for data in datas:
+            sum += data
+
+        output.append(sum/len(datas))
+
+    return np.array(output)
 
 
 def find_nearest(axes, point):

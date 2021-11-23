@@ -70,32 +70,32 @@ def legenda(ax, lat, lon):
     #         markeredgecolor='k', markersize=8, zorder=7)
 
 
-def siglas(ax, r):
-    SIGLAS = { 
-            "CE": (-5.3067450, -39.843010), "AP": (1.258245, -51.609507),
-            "MA": (-4.498199, -45.338160),
-            "PA": (-2.679555, -47.934728),
-            "PB": (-7.2663620, -36.642835), "PE": (-7.755057, -35.272919),
-            "PI": (-7.5557450, -42.802614), "RN": (-5.7803050, -36.786438),
-            "TO": (-6.466770, -48.178640), }
+def siglas(ax, region):
+    if region == "NNE":
+        llon, llat = -40.2, 5
+        SIGLAS = { 
+            "CE": (-5.306745, -39.843010), "AP": (1.258245, -51.609507),
+            "MA": (-4.498199, -45.338160), "PA": (-2.679555, -47.934728),
+            "PB": (-7.266362, -36.642835), "PE": (-7.755057, -35.272919),
+            "PI": (-7.555745, -42.802614), "RN": (-5.7803050, -36.786438),
+            "TO": (-6.466770, -48.178640)
+        }
+    elif region == "SSE":
+        llon, llat = -43, -34.5
+        SIGLAS = {  
+            "ES": (-19.615438, -40.765840), "GO": (-17.138677, -50.355021),
+            "MS": (-19.792475, -52.458537), "BA": (-16.992282, -39.690487),
+            "MG": (-19.587865, -44.699646), "PR": (-25.108172, -49.621746),
+            "RJ": (-22.170342, -42.644215), "RS": (-29.354136, -53.336608),
+            "SC": (-27.207366, -50.449029), "SP": (-22.117968, -48.911867),
+            "MT": (-16.599580, -53.698997),
+        }
 
-    SIGLAS2 = {  
-                "ES": (-19.615438, -40.765840), "GO": (-17.138677, -50.355021),
-                "MS": (-19.792475, -52.458537), "BA": (-16.992282, -39.690487),
-                "MG": (-19.587865, -44.699646), "PR": (-25.108172, -49.621746),
-                "RJ": (-22.170342, -42.644215), "RS": (-29.354136, -53.336608),
-                "SC": (-27.207366, -50.449029), "SP": (-22.117968, -48.911867),
-                "MT": (-16.599580, -53.698997),}
+    ax.text(llon, llat, "Atlantic Ocean", color='#000000', fontstyle='italic',
+            fontsize=20, zorder=14)
 
-
-    if r=="NNE":
-        for k, v in SIGLAS.items():
-            ax.text(v[1], v[0], k, zorder=14)
-            ax.text(-40.2, 5,"Atlantic Ocean", color='#000000', fontstyle='italic', fontsize=20, zorder=14)
-    if r=="SSE":
-        for k, v in SIGLAS2.items():
-            ax.text(v[1], v[0], k, zorder=14)
-            ax.text(-43, -34.5, "Atlantic Ocean", color='#000000', fontstyle='italic', fontsize=20, zorder=14)
+    for k, v in SIGLAS.items():
+        ax.text(v[1], v[0], k, zorder=14)
 
 
 def continente(ax, batimetria=False, zee_color='grey'):
@@ -139,11 +139,11 @@ def moldura(ax):
     gl = ax.gridlines(crs=proj, draw_labels=True, linewidth=1,
                       color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
-    gl.xlocator = mticker.FixedLocator(np.arange(-20, -51, -5))
+    gl.xlocator = mticker.FixedLocator(np.arange(-20, -51, -2))
     gl.top_labels = False
     gl.xlines = False
     gl.yformatter = LATITUDE_FORMATTER
-    gl.ylocator = mticker.FixedLocator(np.arange(5, -36, -5))
+    gl.ylocator = mticker.FixedLocator(np.arange(5, -36, -2))
     gl.right_labels = False
     gl.ylines = False
 
@@ -152,7 +152,7 @@ def moldura2(ax, hori, vert):
     gl = ax.gridlines(crs=proj, draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
-    gl.xlocator = mticker.FixedLocator(np.arange(-50, -22, 8))
+    gl.xlocator = mticker.FixedLocator(np.arange(-50, -22, 4))
     gl.yformatter = LATITUDE_FORMATTER
     gl.ylocator = mticker.FixedLocator(np.arange(5, -36, -5))
     gl.xlines = False
@@ -816,6 +816,9 @@ def plota_gridzoom():
 
 def plota_bat(lats, lons, data, fname, dir_, zee_color='red', area=''):
 
+    if np.nansum(data) == 0:
+        return
+
     plt.rcParams['figure.figsize'] = [10, 10]
 
     fig = plt.figure()
@@ -855,8 +858,8 @@ def plota_bat(lats, lons, data, fname, dir_, zee_color='red', area=''):
 
     elif 'Availability' in fname or 'Complements' in fname \
          or 'Synergy' in fname or 'CF' in fname:
-        vmin, vmax = 0, 80
-        nbins = 8
+        vmin, vmax = 30, 80
+        nbins = 11
         cmap, label = 'inferno', '%'
 
     elif 'WPD' in fname:
@@ -869,11 +872,15 @@ def plota_bat(lats, lons, data, fname, dir_, zee_color='red', area=''):
         nbins = 7
         cmap, label = 'afmhot_r', 'W/m²'
 
+    elif 'AEPw' in fname or 'AEPs' in fname:
+        vmin, vmax = 0, 50
+        nbins = 11
+        cmap, label = 'hot_r', 'TWh'
+
     elif 'AEP' in fname:
-        vmin, vmax = 0, 800
-        vmin, vmax = data[data>0].min(), data[data>0].max()
-        nbins = 10
-        cmap, label = 'hot_r', 'MWh'
+        vmin, vmax = 30, 70
+        nbins = 11
+        cmap, label = 'hot_r', 'TWh'
 
     levels = MaxNLocator(nbins=nbins).tick_values(vmin, vmax)
     cmap = plt.get_cmap(cmap)
@@ -893,4 +900,145 @@ def plota_bat(lats, lons, data, fname, dir_, zee_color='red', area=''):
     fig.colorbar(cf, cax=axins)
 
     plt.savefig(path_output + dir_ + fname + '_' + area + '.png', bbox_inches='tight', dpi=300)
+    plt.show()
+
+
+def plota_bat_m(lats, lons, data, latlons_regions, fname, dir_):
+
+    plt.rcParams['figure.figsize'] = [20, 20]
+
+    def configura(ax, i, hori, vert, cmap):
+        mdata = data[i]
+
+        if np.nansum(mdata) == 0:
+            return
+
+        ax.set_title(meses[i+1], size=18)
+
+        LONi, LONf = -54, -34
+        LATi, LATf = 6, -35
+        bounds = [LONi, LONf, LATi, LATf]
+        ax.set_extent(bounds, crs=proj)
+
+        ocean_cmap = ListedColormap(['#bee8ff'])
+        ocean_levels = [-1000, -998]
+        ocean_norm = BoundaryNorm(ocean_levels, 1)
+        cf = ax.contourf(lons, lats, -999*(1**mdata), levels=ocean_levels,
+                         cmap=ocean_cmap, norm=ocean_norm, transform=proj, zorder=13)
+
+        cmap = plt.get_cmap(cmap)
+        levels = MaxNLocator(nbins=nbins).tick_values(vmin, vmax)
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+
+        mdata[mdata<=0] = np.nan
+        cf = ax.pcolormesh(lons, lats, mdata, cmap=cmap, norm=norm,
+                           transform=proj, zorder=13)
+
+        for region, points in latlons_regions.items():
+            ax.plot([points[0], points[0], points[1], points[1] , points[0]],
+                     [points[2], points[3], points[3], points[2] , points[2]],
+                     color='blue', transform=proj, zorder=48)
+            ax.text(points[0]+.5, points[2]+.5, region, color='#19197090',
+                     transform=proj, zorder=46)
+
+        continente(ax, False)
+        moldura2(ax, hori, vert)
+
+        return cf
+
+
+    if 'CF' in fname:
+        vmin, vmax = 30, 80
+        nbins = 11
+        cmap, label = 'inferno', '%'
+
+    elif 'AEPw' in fname or 'AEPs' in fname:
+        vmin, vmax = 0, 50
+        nbins = 11
+        cmap, label = 'hot_r', 'GWh'
+
+    elif 'AEP' in fname:
+        vmin, vmax = 0, 7000
+        nbins = 11
+        cmap, label = 'hot_r', 'GWh'
+
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(3, 4, hspace=0.11, wspace=-0.68, left=0.0, right=0.8)
+    ax1 = fig.add_subplot(gs[0, 0], projection=proj)
+    ax2 = fig.add_subplot(gs[0, 1], projection=proj)
+    ax3 = fig.add_subplot(gs[0, 2], projection=proj)
+    ax4 = fig.add_subplot(gs[0, 3], projection=proj)
+    ax5 = fig.add_subplot(gs[1, 0], projection=proj)
+    ax6 = fig.add_subplot(gs[1, 1], projection=proj)
+    ax7 = fig.add_subplot(gs[1, 2], projection=proj)
+    ax8 = fig.add_subplot(gs[1, 3], projection=proj)
+    ax9 = fig.add_subplot(gs[2, 0], projection=proj)
+    ax10 = fig.add_subplot(gs[2, 1], projection=proj)
+    ax11 = fig.add_subplot(gs[2, 2], projection=proj)
+    ax12 = fig.add_subplot(gs[2, 3], projection=proj)
+
+    configura(ax1, 0, False, True, cmap)
+    configura(ax2, 1, False, False, cmap)
+    configura(ax3, 2, False, False, cmap)
+    configura(ax4, 3, False, False, cmap)
+    configura(ax5, 4, False, True, cmap)
+    configura(ax6, 5, False, False, cmap)
+    configura(ax7, 6, False, False, cmap)
+    configura(ax8, 7, False, False, cmap)
+    configura(ax9, 8, True, True, cmap)
+    configura(ax10, 9, True, False, cmap)
+    configura(ax11, 10, True, False, cmap)
+    cf = configura(ax12, 11, True, False, cmap)
+
+    axins = inset_axes(ax12, width='100%', height='100%',
+                        loc='lower left', borderpad=0,
+                        bbox_to_anchor=(-3.3, -0.3, 4.2, 0.1),
+                        bbox_transform=ax12.transAxes,
+                        axes_kwargs={'title': label})
+
+    fig.colorbar(cf, cax=axins, orientation='horizontal')
+
+    plt.savefig(path_output + dir_ + fname + '.png', bbox_inches='tight', dpi=300)
+    plt.show()
+
+
+def plota_ts_tec(generations, ysc, fname, dir_, region):    
+
+    plt.rcParams['figure.figsize'] = [12, 4]
+
+    ys1 = generations[region +' (2019)']
+    ys2 = generations[region +' (2020)']
+    period = generations['Period']
+    xs = np.arange(len(period))
+    
+    fig, ax = plt.subplots(figsize=(18, 4))
+    
+    lns1 = ax.bar(xs-.13, ys1, width=.12, color='#0000FF80', align='center')
+    lns2 = ax.bar(xs, ys2, width=.12, color='#ff000080', align='center')
+    lns3 = ax.bar(xs+.13, ysc, width=.12, color='#60FF8080', align='center')
+
+    ax.set_xlabel('Months', fontsize=14)
+    if 'CF' in fname:
+        ax.set_ylabel('%', fontsize=14)
+    if 'AEP' in fname:  
+        ax.set_ylabel('GWh', fontsize=14)
+
+    plt.xticks(xs, [m for m in period])
+    plt.xlim([xs[0]-1, xs[-1]+1])
+
+    ax.legend((lns1[0], lns2[0], lns3[0]),
+              ('Monthly Hydraulic Energy Generation - 2019',
+               'Monthly Hydraulic Energy Generation - 2020',
+               'Monthly Energy Produced - Climatology'), loc=1)
+
+    ax.grid()
+    
+    props = dict(facecolor='blue')
+    ax.text(0.007, .97, region + ' - ' + fname , fontsize=16, color='w',
+            bbox=props, transform=ax.transAxes, verticalalignment='top')
+    
+    plt.savefig('{}{}{}_{}.png'.format(path_output, dir_, fname, region),
+                bbox_inches='tight', dpi=300)
+    
     plt.show()

@@ -44,9 +44,13 @@ selected_months = np.arange(1, 13)
 
 selected_hours = np.arange(0, 24)
 
-meses = {1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio',
-         6: 'Junho', 7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro',
-         11: 'Novembro', 12: 'Dezembro'}
+# meses = {1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio',
+#          6: 'Junho', 7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro',
+#          11: 'Novembro', 12: 'Dezembro'}
+
+meses = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May',
+         6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct',
+         11: 'Nov', 12: 'Dec'}
 
 
 latlon_points = {-33.14609: -50.34208,
